@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--validation", action="store_true")
 args = parser.parse_args()
 
+args.validation = True
 if args.validation:
     DATA_TYPE = "train"
     SCENE_TYPE = "submission"
@@ -27,35 +28,35 @@ else:
     SCENE_TYPE = "submission"
 
 from pathlib import Path
-output_dir = Path("/kaggle/working/")
+output_dir = Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/working")
 
 import os
 import shutil
 
-os.makedirs("/root/.cache/torch/hub/checkpoints/", exist_ok=True)
+os.makedirs("~/.cache/torch/hub/checkpoints/", exist_ok=True)
 shutil.copy(
-    "/kaggle/input/aliked-pytorch-aliked-n16-v1/aliked-n16.pth",
-    "/root/.cache/torch/hub/checkpoints/",
+    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/aliked-n16.pth",
+    "~/.cache/torch/hub/checkpoints/",
 )
 shutil.copy(
-    "/kaggle/input/lightglue-pytorch-aliked-v1/aliked_lightglue.pth",
-    "/root/.cache/torch/hub/checkpoints/",
+    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/aliked_lightglue.pth",
+    "~/.cache/torch/hub/checkpoints/",
 )
 shutil.copy(
-    "/kaggle/input/lightglue-pytorch-aliked-v1/aliked_lightglue.pth",
-    "/root/.cache/torch/hub/checkpoints/aliked_lightglue_v0-1_arxiv-pth",
+    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/aliked_lightglue.pth",
+    "~/.cache/torch/hub/checkpoints/aliked_lightglue_v0-1_arxiv-pth",
 )
 shutil.copy(
-    "/kaggle/input/check-orientation/2020-11-16_resnext50_32x4d.zip",
-    "/root/.cache/torch/hub/checkpoints/",
+    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/2020-11-16_resnext50_32x4d.pth",
+    "~/.cache/torch/hub/checkpoints/",
 )
 shutil.copy(
-    "/kaggle/input/dinov2-repo/dinov2_vits14_pretrain.pth",
-    "/root/.cache/torch/hub/checkpoints/",
+    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_pretrain.pth",
+    "~/.cache/torch/hub/checkpoints/",
 )
 shutil.copy(
-    "/kaggle/input/dinov2-repo/dinov2_vits14_voc2012_linear_head.pth",
-    "/root/.cache/torch/hub/checkpoints/",
+    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_voc2012_linear_head.pth",
+    "~/.cache/torch/hub/checkpoints/",
 )
 
 import argparse
@@ -98,7 +99,7 @@ from tqdm.auto import tqdm
 # DINOv2 Segmenter
 # https://github.com/facebookresearch/dinov2
 
-sys.path.append('/kaggle/input/dinov2-repo/dinov2')
+sys.path.append('/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2')
 import dinov2.eval.segmentation.models
 
 class CenterPadding(torch.nn.Module):
@@ -137,18 +138,18 @@ def dinov2_segmentation(
     device_id,
 ):
 
-    device = torch.device(f"cuda:{device_id}")
+    device = torch.device("cuda")
 
-    backbone_model = torch.hub.load('/kaggle/input/dinov2-repo/dinov2', model="dinov2_vits14", source='local')
+    backbone_model = torch.hub.load('/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2', model="dinov2_vits14", source='local')
     backbone_model.eval()
     backbone_model.to(device)
 
     #head_config_url = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_voc2012_linear_config.py"
-    cfg = mmcv.Config.fromfile("/kaggle/input/dinov2-repo/dinov2_vits14_voc2012_linear_config.py")
+    cfg = mmcv.Config.fromfile("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_voc2012_linear_config.py")
 
     model = create_segmenter(cfg, backbone_model=backbone_model)
     #head_checkpoint_url = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_voc2012_linear_head.pth"
-    load_checkpoint(model, "/kaggle/input/dinov2-repo/dinov2_vits14_voc2012_linear_head.pth", map_location="cpu")
+    load_checkpoint(model, "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_voc2012_linear_head.pth", map_location="cpu")
     model.to(device)
     model.eval()
 
@@ -225,15 +226,26 @@ def detect_keypoints(
     detection_threshold,
     resize_to,
 ):
-    device = torch.device(f"cuda:{device_id}")
+    device = torch.device("cuda")
 
     dtype = torch.float32 # ALIKED has issues with float16
 
-    extractor = ALIKED(
-        max_num_keypoints=num_features,
-        detection_threshold=detection_threshold,
-        resize=resize_to,
-    ).eval().to(device, dtype)
+    # extractor = ALIKED(
+    #     max_num_keypoints=num_features,
+    #     detection_threshold=detection_threshold,
+    #     resize=resize_to,
+    # ).eval().to(device, dtype)
+
+    try:
+        extractor = ALIKED(
+            max_num_keypoints=num_features,
+            detection_threshold=detection_threshold,
+            resize=resize_to,
+        ).eval().to(device, dtype)
+        print(f"Extractor initialized on GPU {device_id}")
+    except Exception as e:
+        print(f"Error initializing extractor on GPU {device_id}: {e}")
+        return
 
     with h5py.File(feature_dir / f"keypoints_deg{device_id}.h5", mode="w") as f_keypoints_deg, \
          h5py.File(feature_dir / f"descriptors_deg{device_id}.h5", mode="w") as f_descriptors_deg, \
@@ -287,6 +299,80 @@ def detect_keypoints(
 
     return
 
+def detect_keypoints_sift(
+    paths,
+    feature_dir,
+    num_features,
+):
+    sift = cv2.SIFT_create(nfeatures=num_features)
+
+    with h5py.File(feature_dir / "keypoints_deg.h5", mode="w") as f_keypoints_deg, \
+         h5py.File(feature_dir / "descriptors_deg.h5", mode="w") as f_descriptors_deg, \
+         h5py.File(feature_dir / "offsets.h5", mode="w") as f_offsets_deg, \
+         h5py.File(feature_dir / "keypoints.h5", mode="w") as f_keypoints:
+
+        for path in tqdm(paths, desc="Computing keypoints with SIFT", dynamic_ncols=True):
+            # Read the color image
+            color_image = cv2.imread(str(path))
+            if color_image is None:
+                print(f"Failed to read image: {path}")
+                continue
+
+            # Convert color image to grayscale for SIFT
+            gray_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+
+            # Pad image to square if needed
+            gray_image = pad_to_square(gray_image)
+            color_image = pad_to_square(color_image)
+
+            key = path.name
+
+            f_keypoints_deg.create_group(key)
+            f_descriptors_deg.create_group(key)
+            f_offsets_deg.create_group(key)
+
+            keypoints_list = []
+            offset = 0
+
+            for deg in ["0deg", "90deg", "180deg", "270deg"]:
+                if deg != "0deg":
+                    gray_image = cv2.rotate(gray_image, cv2.ROTATE_90_CLOCKWISE)
+
+                keypoints, descriptors = sift.detectAndCompute(gray_image, None)
+
+                if keypoints is None or descriptors is None:
+                    keypoints = []
+                    descriptors = np.empty((0, 128))
+
+                keypoints_np = np.array([kp.pt for kp in keypoints], dtype=np.float32)
+
+                # Save keypoints and descriptors for this rotation
+                f_keypoints_deg[key][deg] = keypoints_np
+                f_descriptors_deg[key][deg] = descriptors
+                f_offsets_deg[key][deg] = offset
+
+                offset += keypoints_np.shape[0]
+
+                # Reverse rotation of keypoints
+                temp = keypoints_np.copy()
+                if deg == "90deg":
+                    keypoints_np[:, 0] = temp[:, 1]
+                    keypoints_np[:, 1] = gray_image.shape[1] - temp[:, 0]
+                elif deg == "180deg":
+                    keypoints_np[:, 0] = gray_image.shape[1] - temp[:, 0]
+                    keypoints_np[:, 1] = gray_image.shape[0] - temp[:, 1]
+                elif deg == "270deg":
+                    keypoints_np[:, 0] = gray_image.shape[0] - temp[:, 1]
+                    keypoints_np[:, 1] = temp[:, 0]
+
+                keypoints_list.append(keypoints_np)
+
+            # Save combined keypoints for all rotations
+            f_keypoints[key] = np.concatenate(keypoints_list) if keypoints_list else np.empty((0, 2))
+
+    return
+
+
 # special function for transparent object
 def detect_keypoints_transparent(
     paths,
@@ -296,7 +382,7 @@ def detect_keypoints_transparent(
     detection_threshold,
     resize_to,
 ):
-    device = torch.device(f"cuda:{device_id}")
+    device = torch.device("cuda")
 
     dtype = torch.float32 # ALIKED has issues with float16
 
@@ -396,7 +482,7 @@ def keypoint_distances(
     min_matches,
     verbose,
 ):
-    device = torch.device(f"cuda:{device_id}")
+    device = torch.device("cuda")
 
     matcher_params = {
         "width_confidence": -1,
@@ -464,7 +550,7 @@ def keypoint_distances_transparent(
     min_matches,
     verbose,
 ):
-    device = torch.device(f"cuda:{device_id}")
+    device = torch.device("cuda")
 
     matcher_params = {
         "width_confidence": -1,
@@ -656,7 +742,7 @@ def exec_rotation_correction(paths, output_dir):
 # Doppelgangers: Learning to Disambiguate Images of Similar Structures
 # https://github.com/RuojinCai/Doppelgangers
 
-sys.path.append("/kaggle/input/doppelgangers-repo/doppelgangers")
+sys.path.append("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/doppelgangers")
 from doppelgangers.third_party.loftr import LoFTR, default_cfg
 from doppelgangers.utils.loftr_matches import read_image
 
@@ -665,7 +751,7 @@ def save_loftr_matches(data_path, pairs_info, pairs_info_index, output_path, dev
     # The outdoor and indoor models share the same config.
     # You can change the default values like thr and coarse_match_type.
 
-    device = torch.device(f"cuda:{device_id}")
+    device = torch.device("cuda")
 
     matcher = LoFTR(config=default_cfg)
     matcher.load_state_dict(torch.load(model_weight_path)['state_dict'])
@@ -855,7 +941,7 @@ def exec_doppelgangers_classifier(
 ##########################################
 # Identify duplicate structures by 3D point cloud
 
-sys.path.append("/kaggle/input/colmap-db-import")
+sys.path.append("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/colmap_db_import")
 from prepare_colmap import read_images_binary, read_cameras_binary, read_points3D_binary, project_3d_to_2d, get_camera_param
 
 def get_points_inside_cameraview(
@@ -1108,7 +1194,7 @@ def get_focal_length_prior(paths, recon_data_dir):
 ##########################################
 # COLMAP Utils
 
-sys.path.append("/kaggle/input/colmap-db-import")
+sys.path.append("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/colmap_db_import")
 from database import COLMAPDatabase
 from h5_to_db import add_keypoints, add_matches
 
@@ -1145,16 +1231,16 @@ def import_into_colmap(
 ##########################################
 # Submission Utils
 
-def parse_sample_submission(data_type, scene_type):
+def parse_sample_submission(data_type, scene_type, config):
 
-    df_scene = pd.read_csv(f"/kaggle/input/image-matching-challenge-2024/{data_type}/categories.csv")
+    df_scene = pd.read_csv(f"/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/image-matching-challenge-2024/{data_type}/categories.csv")
     if data_type == "train":
-        df = pd.read_csv("/kaggle/input/imc2024-validation/validation.csv")
+        df = pd.read_csv(config.ground_truth_path)
         if scene_type != "submission":
             df = df[df["scene"] == scene_type]
             df_scene = df_scene[df_scene["scene"] == scene_type]
     else:
-        df = pd.read_csv("/kaggle/input/image-matching-challenge-2024/sample_submission.csv")
+        df = pd.read_csv(config.ground_truth_path)
 
     data_dict = {}
     category_dict = {}
@@ -1166,7 +1252,7 @@ def parse_sample_submission(data_type, scene_type):
 
             image_path_list = df[(df["dataset"] == dataset) & (df["scene"] == scene)]["image_path"].tolist()
             for image_path in image_path_list:
-                data_dict[dataset][scene].append(Path(f"/kaggle/input/image-matching-challenge-2024/{image_path}"))
+                data_dict[dataset][scene].append(Path(f"/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/image-matching-challenge-2024/{image_path}"))
 
             category_dict[dataset][scene] = df_scene[df_scene["scene"] == scene]["categories"].values[0]
 
@@ -1228,35 +1314,42 @@ def feature_matching_default(
     trial_index,
 ):
     # Detect keypoints of all images
-    with ThreadPoolExecutor() as executor:
-        executor.map(
-            detect_keypoints,
-            np.array_split(image_paths, config.num_gpus),
-            itertools.repeat(feature_dir),
-            range(config.num_gpus),
-            itertools.repeat(config.keypoint_detection_args["num_features"]),
-            itertools.repeat(config.keypoint_detection_args["detection_threshold"]),
-            itertools.repeat(config.keypoint_detection_args["resize_to"]),
-        )
-    torch.cuda.empty_cache()
-    gc.collect()
+    if config.keypoints_detection == "aliked":
+        with ThreadPoolExecutor() as executor:
+            executor.map(
+                detect_keypoints,
+                np.array_split(image_paths, config.num_gpus),
+                itertools.repeat(feature_dir),
+                range(config.num_gpus),
+                itertools.repeat(config.keypoint_detection_args["num_features"]),
+                itertools.repeat(config.keypoint_detection_args["detection_threshold"]),
+                itertools.repeat(config.keypoint_detection_args["resize_to"]),
+            )
+        torch.cuda.empty_cache()
+        gc.collect()
 
-    merge_single_h5(
-        feature_dir,
-        [ f"keypoints{i}.h5" for i in range(config.num_gpus) ],
-        "keypoints.h5",
-    )
-    for i in range(config.num_gpus):
-        (feature_dir / f"keypoints{i}.h5").unlink()
-
-    for file_prefix in ["descriptors_deg", "keypoints_deg", "offsets"]:
-        merge_double_h5(
+        merge_single_h5(
             feature_dir,
-            [ f"{file_prefix}{i}.h5" for i in range(config.num_gpus) ],
-            f"{file_prefix}.h5",
+            [ f"keypoints{i}.h5" for i in range(config.num_gpus) ],
+            "keypoints.h5",
         )
         for i in range(config.num_gpus):
-            (feature_dir / f"{file_prefix}{i}.h5").unlink()
+            (feature_dir / f"keypoints{i}.h5").unlink()
+
+        for file_prefix in ["descriptors_deg", "keypoints_deg", "offsets"]:
+            merge_double_h5(
+                feature_dir,
+                [ f"{file_prefix}{i}.h5" for i in range(config.num_gpus) ],
+                f"{file_prefix}.h5",
+            )
+            for i in range(config.num_gpus):
+                (feature_dir / f"{file_prefix}{i}.h5").unlink()
+    elif config.keypoints_detection == "sift":
+        detect_keypoints_sift(
+            paths=image_paths,
+            feature_dir=feature_dir,
+            num_features=config.keypoint_detection_args["num_features"],
+        )
 
     # Match keypoints of pairs of similar images
     with ThreadPoolExecutor() as executor:
@@ -1270,8 +1363,8 @@ def feature_matching_default(
             itertools.repeat(config.keypoint_distances_args["min_matches"][trial_index]),
             itertools.repeat(config.keypoint_distances_args["verbose"]),
         )
-    (feature_dir / "descriptors_deg.h5").unlink()
-    (feature_dir / "keypoints_deg.h5").unlink()
+    # (feature_dir / "descriptors_deg.h5").unlink()
+    # (feature_dir / "keypoints_deg.h5").unlink()
     torch.cuda.empty_cache()
     gc.collect()
 
@@ -1343,8 +1436,8 @@ def feature_matching_transparent(
     torch.cuda.empty_cache()
     gc.collect()
 
-    (feature_dir / "fg_mask.h5").unlink()
-    shutil.rmtree(corrected_images_dir)
+    # (feature_dir / "fg_mask.h5").unlink()
+    # shutil.rmtree(corrected_images_dir)
 
     merge_single_h5(
         feature_dir,
@@ -1377,9 +1470,9 @@ def feature_matching_transparent(
             itertools.repeat(config.keypoint_distances_args["min_matches"][trial_index]),
             itertools.repeat(config.keypoint_distances_args["verbose"]),
         )
-    (feature_dir / "descriptors_grid.h5").unlink()
-    (feature_dir / "keypoints_grid.h5").unlink()
-    (feature_dir / "offsets_grid.h5").unlink()
+    # (feature_dir / "descriptors_grid.h5").unlink()
+    # (feature_dir / "keypoints_grid.h5").unlink()
+    # (feature_dir / "offsets_grid.h5").unlink()
     torch.cuda.empty_cache()
     gc.collect()
 
@@ -1409,7 +1502,10 @@ def feature_matching(args, config):
     database_path = feature_dir / "database.db"
 
     # Get the pairs of images that are somewhat similar
-    index_pairs = get_pairs_exhaustive(image_paths)
+    if config.use_dinov2_in_non_transparent_pairing:
+        index_pairs = get_pairs_with_dinov2(image_paths)
+    else:
+        index_pairs = get_pairs_exhaustive(image_paths)
     gc.collect()
 
     # KeyPoint Detection and Matching
@@ -1438,12 +1534,12 @@ def feature_matching(args, config):
         camera_model = "simple-radial" if ("historical_preservation" in categories) or ("transparent" in categories) else "simple-pinhole",
         single_camera = True if "transparent" in categories else False,
     )
-    if ("symmetries-and-repeats" not in categories):
-        for file_path in feature_dir.glob("*.h5"):
-            file_path.unlink()
-    if ("transparent" in categories):
-        for file_path in feature_dir.glob("*.h5"):
-            file_path.unlink()
+    # if ("symmetries-and-repeats" not in categories):
+    #     for file_path in feature_dir.glob("*.h5"):
+    #         file_path.unlink()
+    # if ("transparent" in categories):
+    #     for file_path in feature_dir.glob("*.h5"):
+    #         file_path.unlink()
 
     results = {
         "image_paths": image_paths,
@@ -1579,8 +1675,8 @@ def refine_symmetries_and_repeats(
         focal_length_dict = get_focal_length_prior(image_paths, recon_data_dir),
         single_camera = False,
     )
-    for file_path in feature_dir.glob("*.h5"):
-        file_path.unlink()
+    # for file_path in feature_dir.glob("*.h5"):
+    #     file_path.unlink()
 
     pycolmap.match_exhaustive(database_path)
     gc.collect()
@@ -1615,6 +1711,9 @@ def refine_symmetries_and_repeats(
         shutil.rmtree(feature_dir)
 
     if best_idx is not None:
+        output_file_path = "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/working/best_id.txt"
+        with open(output_file_path, "w") as f:
+            f.write(f"Best reconstruction index: {best_idx}\n")
         results = {}
         results["best_idx"] = best_idx
         results["maps"] = deepcopy(maps)
@@ -1721,9 +1820,57 @@ def prepare_multithreading(params):
 def get_pairs_exhaustive(lst):
     return list(itertools.combinations(range(len(lst)), 2))
 
+
+from PIL import Image
+from sklearn.metrics.pairwise import cosine_distances
+from dinov2.models import build_model_from_cfg
+
+def get_pairs_with_dinov2(image_paths, threshold=0.6, min_matches=20):
+    # Load DINOv2 model
+    device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
+    backbone_model = torch.hub.load('/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2', model="dinov2_vits14", source='local')
+    backbone_model.to(device)
+    backbone_model.eval()
+
+    # Preprocessing for images
+    preprocess = T.Compose([
+        T.Resize((224, 224)),
+        T.ToTensor(),
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    # Extract embeddings
+    embeddings = []
+    for image_path in image_paths:
+        image = Image.open(image_path).convert("RGB")
+        image_tensor = preprocess(image).unsqueeze(0).to(device)
+        with torch.no_grad():
+            embedding = backbone_model(image_tensor)
+        embeddings.append(embedding.cpu().numpy().flatten())
+
+    embeddings = np.vstack(embeddings)
+
+    # Compute pairwise cosine distances
+    distances = cosine_distances(embeddings)
+
+    # Find similar pairs based on threshold
+    index_pairs = []
+    for i in range(len(image_paths)):
+        similar_indices = np.where(distances[i] < threshold)[0]
+        if len(similar_indices) < min_matches:
+            closest_indices = np.argsort(distances[i])[:min_matches]
+            similar_indices = np.union1d(similar_indices, closest_indices)
+
+        for j in similar_indices:
+            if i < j:
+                index_pairs.append((i, j))
+
+    return index_pairs
+
+
 def run_from_config(config):
 
-    data_dict, category_dict = parse_sample_submission(DATA_TYPE, SCENE_TYPE)
+    data_dict, category_dict = parse_sample_submission(DATA_TYPE, SCENE_TYPE, config)
     datasets = list(data_dict.keys())
 
     ############################
@@ -1748,16 +1895,16 @@ def run_from_config(config):
             images_dir = data_dict[dataset][scene][0].parent
             image_paths = list(images_dir.glob("*"))
 
-            if len(image_paths) > 100:
-                # random sampling
-                test_image_paths = data_dict[dataset][scene]
-                additional_image_paths = [path for path in image_paths if path not in test_image_paths]
+            # if len(image_paths) > 100:
+            #     # random sampling
+            #     test_image_paths = data_dict[dataset][scene]
+            #     additional_image_paths = [path for path in image_paths if path not in test_image_paths]
 
-                random.shuffle(additional_image_paths)
-                additional_image_size = 100 - len(test_image_paths)
-                additional_image_paths = additional_image_paths[:additional_image_size]
+            #     random.shuffle(additional_image_paths)
+            #     additional_image_size = 100 - len(test_image_paths)
+            #     additional_image_paths = additional_image_paths[:additional_image_size]
 
-                image_paths = test_image_paths + additional_image_paths
+            #     image_paths = test_image_paths + additional_image_paths
 
             if dataset not in image_paths_list:
                 image_paths_list[dataset] = {}
@@ -1902,11 +2049,12 @@ def run_from_config(config):
 
 # config
 class Config:
-    base_path = Path("/kaggle/input/image-matching-challenge-2024")
+    base_path = Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/image-matching-challenge-2024")
     feature_dir = output_dir / ".feature_outputs"
 
     device = K.utils.get_cuda_device_if_available(0)
-    num_gpus = torch.cuda.device_count()
+    # num_gpus = torch.cuda.device_count()
+    num_gpus = 1
 
     num_trials = 2
 
@@ -1929,8 +2077,8 @@ class Config:
     }
 
     doppelgangers_classifier_args = {
-        "loftr_weight_path": Path("/kaggle/input/loftr-pytorch-outdoor-v1/loftr_outdoor.ckpt"),
-        "doppelgangers_weight_path": Path("/kaggle/input/doppelgangers-repo/doppelgangers/weights/doppelgangers_classifier_loftr.pt"),
+        "loftr_weight_path": Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/loftr_outdoor.ckpt"),
+        "doppelgangers_weight_path": Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/doppelgangers/weights/doppelgangers_classifier_loftr.pt"),
     }
 
     remove_ambiguous_area_args = {
@@ -1949,5 +2097,12 @@ class Config:
         "min_model_size": 3,
         "max_num_models": 2,
     }
+
+    use_dinov2_in_non_transparent_pairing = True
+
+    # keypoints_detection = "aliked"
+    keypoints_detection = "sift"
+
+    ground_truth_path = "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/validation/validation_church.csv"
 
 run_from_config(Config)
