@@ -3,6 +3,8 @@ input/*
 
 LightGlue/
 
+docker/
+
 .feature_outputs/
 *.csv
 *.txt
