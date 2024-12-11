@@ -28,35 +28,35 @@ else:
     SCENE_TYPE = "submission"
 
 from pathlib import Path
-output_dir = Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/working")
+output_dir = Path("../output")
 
 import os
 import shutil
 
-os.makedirs("~/.cache/torch/hub/checkpoints/", exist_ok=True)
+os.makedirs(os.path.expanduser("~/.cache/torch/hub/checkpoints/"), exist_ok=True)
 shutil.copy(
-    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/aliked-n16.pth",
-    "~/.cache/torch/hub/checkpoints/",
+    "../input/aliked-n16.pth",
+    os.path.expanduser("~/.cache/torch/hub/checkpoints/"),
 )
 shutil.copy(
-    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/aliked_lightglue.pth",
-    "~/.cache/torch/hub/checkpoints/",
+    "../input/aliked_lightglue.pth",
+    os.path.expanduser("~/.cache/torch/hub/checkpoints/"),
 )
 shutil.copy(
-    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/aliked_lightglue.pth",
-    "~/.cache/torch/hub/checkpoints/aliked_lightglue_v0-1_arxiv-pth",
+    "../input/aliked_lightglue.pth",
+    os.path.expanduser("~/.cache/torch/hub/checkpoints/"),
 )
 shutil.copy(
-    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/2020-11-16_resnext50_32x4d.pth",
-    "~/.cache/torch/hub/checkpoints/",
+    "../input/2020-11-16_resnext50_32x4d.pth",
+    os.path.expanduser("~/.cache/torch/hub/checkpoints/"),
 )
 shutil.copy(
-    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_pretrain.pth",
-    "~/.cache/torch/hub/checkpoints/",
+    "../input/dinov2/dinov2_vits14_pretrain.pth",
+    os.path.expanduser("~/.cache/torch/hub/checkpoints/"),
 )
 shutil.copy(
-    "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_voc2012_linear_head.pth",
-    "~/.cache/torch/hub/checkpoints/",
+    "../input/dinov2/dinov2_vits14_voc2012_linear_head.pth",
+    os.path.expanduser("~/.cache/torch/hub/checkpoints/"),
 )
 
 import argparse
@@ -99,7 +99,7 @@ from tqdm.auto import tqdm
 # DINOv2 Segmenter
 # https://github.com/facebookresearch/dinov2
 
-sys.path.append('/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2')
+sys.path.append('../input/dinov2/dinov2')
 import dinov2.eval.segmentation.models
 
 class CenterPadding(torch.nn.Module):
@@ -140,16 +140,16 @@ def dinov2_segmentation(
 
     device = torch.device("cuda")
 
-    backbone_model = torch.hub.load('/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2', model="dinov2_vits14", source='local')
+    backbone_model = torch.hub.load('../input/dinov2/dinov2', model="dinov2_vits14", source='local')
     backbone_model.eval()
     backbone_model.to(device)
 
     #head_config_url = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_voc2012_linear_config.py"
-    cfg = mmcv.Config.fromfile("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_voc2012_linear_config.py")
+    cfg = mmcv.Config.fromfile("../input/dinov2/dinov2_vits14_voc2012_linear_config.py")
 
     model = create_segmenter(cfg, backbone_model=backbone_model)
     #head_checkpoint_url = "https://dl.fbaipublicfiles.com/dinov2/dinov2_vits14/dinov2_vits14_voc2012_linear_head.pth"
-    load_checkpoint(model, "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2_vits14_voc2012_linear_head.pth", map_location="cpu")
+    load_checkpoint(model, "../input/dinov2/dinov2_vits14_voc2012_linear_head.pth", map_location="cpu")
     model.to(device)
     model.eval()
 
@@ -742,7 +742,7 @@ def exec_rotation_correction(paths, output_dir):
 # Doppelgangers: Learning to Disambiguate Images of Similar Structures
 # https://github.com/RuojinCai/Doppelgangers
 
-sys.path.append("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/doppelgangers")
+sys.path.append("../input/doppelgangers")
 from doppelgangers.third_party.loftr import LoFTR, default_cfg
 from doppelgangers.utils.loftr_matches import read_image
 
@@ -941,7 +941,7 @@ def exec_doppelgangers_classifier(
 ##########################################
 # Identify duplicate structures by 3D point cloud
 
-sys.path.append("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/colmap_db_import")
+sys.path.append("../input/colmap_db_import")
 from prepare_colmap import read_images_binary, read_cameras_binary, read_points3D_binary, project_3d_to_2d, get_camera_param
 
 def get_points_inside_cameraview(
@@ -1194,7 +1194,7 @@ def get_focal_length_prior(paths, recon_data_dir):
 ##########################################
 # COLMAP Utils
 
-sys.path.append("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/colmap_db_import")
+sys.path.append("../input/colmap_db_import")
 from database import COLMAPDatabase
 from h5_to_db import add_keypoints, add_matches
 
@@ -1233,7 +1233,7 @@ def import_into_colmap(
 
 def parse_sample_submission(data_type, scene_type, config):
 
-    df_scene = pd.read_csv(f"/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/image-matching-challenge-2024/{data_type}/categories.csv")
+    df_scene = pd.read_csv(f"../input/image-matching-challenge-2024/{data_type}/categories.csv")
     if data_type == "train":
         df = pd.read_csv(config.ground_truth_path)
         if scene_type != "submission":
@@ -1252,7 +1252,7 @@ def parse_sample_submission(data_type, scene_type, config):
 
             image_path_list = df[(df["dataset"] == dataset) & (df["scene"] == scene)]["image_path"].tolist()
             for image_path in image_path_list:
-                data_dict[dataset][scene].append(Path(f"/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/image-matching-challenge-2024/{image_path}"))
+                data_dict[dataset][scene].append(Path(f"../input/image-matching-challenge-2024/{image_path}"))
 
             category_dict[dataset][scene] = df_scene[df_scene["scene"] == scene]["categories"].values[0]
 
@@ -1711,7 +1711,7 @@ def refine_symmetries_and_repeats(
         shutil.rmtree(feature_dir)
 
     if best_idx is not None:
-        output_file_path = "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/working/best_id.txt"
+        output_file_path = "../output/best_id.txt"
         with open(output_file_path, "w") as f:
             f.write(f"Best reconstruction index: {best_idx}\n")
         results = {}
@@ -1828,7 +1828,7 @@ from dinov2.models import build_model_from_cfg
 def get_pairs_with_dinov2(image_paths, threshold=0.6, min_matches=20):
     # Load DINOv2 model
     device = torch.device(f"cuda" if torch.cuda.is_available() else "cpu")
-    backbone_model = torch.hub.load('/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/dinov2/dinov2', model="dinov2_vits14", source='local')
+    backbone_model = torch.hub.load('../input/dinov2/dinov2', model="dinov2_vits14", source='local')
     backbone_model.to(device)
     backbone_model.eval()
 
@@ -2049,7 +2049,7 @@ def run_from_config(config):
 
 # config
 class Config:
-    base_path = Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/image-matching-challenge-2024")
+    base_path = Path("../input/image-matching-challenge-2024")
     feature_dir = output_dir / ".feature_outputs"
 
     device = K.utils.get_cuda_device_if_available(0)
@@ -2077,8 +2077,8 @@ class Config:
     }
 
     doppelgangers_classifier_args = {
-        "loftr_weight_path": Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/loftr_outdoor.ckpt"),
-        "doppelgangers_weight_path": Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/doppelgangers/weights/doppelgangers_classifier_loftr.pt"),
+        "loftr_weight_path": Path("../input/loftr_outdoor.ckpt"),
+        "doppelgangers_weight_path": Path("../input/doppelgangers/weights/doppelgangers_classifier_loftr.pt"),
     }
 
     remove_ambiguous_area_args = {
@@ -2098,11 +2098,11 @@ class Config:
         "max_num_models": 2,
     }
 
-    use_dinov2_in_non_transparent_pairing = True
+    use_dinov2_in_non_transparent_pairing = False
 
-    # keypoints_detection = "aliked"
-    keypoints_detection = "sift"
+    keypoints_detection = "aliked"
+    # keypoints_detection = "sift"
 
-    ground_truth_path = "/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/validation/validation_church.csv"
+    ground_truth_path = "../input/validation/validation_church.csv"
 
 run_from_config(Config)
