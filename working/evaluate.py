@@ -372,10 +372,10 @@ def score(solution: pd.DataFrame, submission: pd.DataFrame) -> float:
 
 if __name__ == "__main__":
 
-    input_dir = Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/working")
-    output_dir = Path("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/working")
+    input_dir = Path("../output")
+    output_dir = Path("../output")
 
-    gt_df = pd.read_csv("/restricted/projectnb/czproj/aqzou/image_matching/kaggle-image-matching-challenge-2024_1/input/validation/validation_church.csv")
+    gt_df = pd.read_csv("../input/validation/validation_church.csv")
 
     scene_list = [ scene for scene in input_dir.glob("*.csv") ]
 
