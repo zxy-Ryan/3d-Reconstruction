@@ -5,6 +5,12 @@ LightGlue/
 
 docker/
 
+.vscode/
+
+output/
+
+img/
+
 .feature_outputs/
 *.csv
 *.txt
